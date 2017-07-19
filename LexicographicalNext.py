@@ -1,3 +1,4 @@
+#Algorithm: https://www.nayuki.io/page/next-lexicographical-permutation-algorithm
 for _ in range(int(input())):
     s = input()
     grt = False
