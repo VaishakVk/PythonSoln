@@ -5,7 +5,7 @@ for _ in range(int(input())):
         if s[i] < s[i+1]:
             grt = True
             index = i
-            break
+            break 
     if grt == False:
         print('no answer')
     else:
