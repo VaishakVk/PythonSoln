@@ -1,0 +1,19 @@
+	
+#!/bin/python3
+# https://www.hackerrank.com/challenges/two-characters/problem
+import sys
+
+
+s_len = int(input().strip())
+s = input().strip()
+k = list(s)
+l = list(set(k))
+max_len,sum_m = 0,0
+for i in range(len(set(k))):
+    for j in range(i,len(set(k))):
+        if l[i] != l[j]:
+            m = list(filter(lambda x:x == l[i] or x == l[j], k))
+            sum_m = sum(1 for i in range(len(m)-1) if m[i] == m[i+1]) 
+            if sum_m == 0 and len(m) > 1:
+                max_len = max(max_len, len(m))
+print(max_len)
