@@ -1,0 +1,26 @@
+#!/bin/python3
+#https://www.hackerrank.com/contests/openbracket-2017/challenges/finding-subsequence/problem
+import sys
+
+def solve(s, k):
+    start = s.index(max(i for i in set(s) if s.count(i) >= k))
+    string_to_compare = s[start:]
+    string_to_compare = list(filter(lambda x:string_to_compare.count(x) >= k, string_to_compare))
+    m = sorted(set(string_to_compare), reverse = True)
+    l = []
+    strt = 0
+    for i in m:
+        cnt = string_to_compare[strt:].count(i)
+        if cnt >= k:
+            while(cnt > 0):
+                strt = string_to_compare.index(i,strt)
+                l.append(i)
+                cnt -= 1
+                strt += 1
+    return("".join(l))
+
+if __name__ == "__main__":
+    s = input().strip()
+    k = int(input().strip())
+    result = solve(s, k)
+    print(result)
