@@ -1,0 +1,14 @@
+#https://www.hackerrank.com/challenges/big-sorting/problem
+n = int(input().strip())
+bucket = {}
+
+# read all integers as strings, store them by length in the bucket
+for _ in range(n):
+    number = input().strip()
+    length = len(number)
+    if length not in bucket:
+        bucket[length] = []
+    bucket[length].append(number)
+for i in sorted(bucket):
+    for j in sorted(bucket[i]):
+        print(j)
