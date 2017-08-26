@@ -1,0 +1,20 @@
+#https://www.hackerearth.com/challenge/competitive/august-circuits-17/algorithm/string-matching-google-3dc355a5/
+arr = list(map(int,input()))
+n = int(input())
+a = sorted(list(map(int,input().split())))
+strt = -1
+end = -1
+sum = 0
+array = []
+for i in range(len(arr)):
+    #print('Outer',i)
+    for j in range(i,len(arr)):
+        #print('Inner',j,arr[j])
+        if arr[j] in a and arr[j] not in array:
+            array.append(arr[j])
+            if sorted(array) == a:
+                sum += (len(arr)-j)
+                array = []
+                break
+    #print(sum)
+print(sum)
