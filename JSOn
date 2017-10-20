@@ -1,7 +1,0 @@
-{
-  "$class": "org.acme.mynetwork.Trader",
-  "tradeId": "string",
-  "firstName": "string",
-  "lastName": "string"
-}
-The `Trader` instance is not valid. Details: `tradeId` can't be blank (value: undefined); `firstName` can't be blank (value: undefined); `lastName` can't be blank (value: undefined).
