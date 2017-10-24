@@ -1,373 +1,393 @@
-Select rows with maximum value
+Default Parameter Values in Python
 
-/*Consider a database with following columns
-Table: Revs
-ID Revision Value
-1  1 		10
-2  1		20
-1  2        10
-1  3        50
-2  2        30
+Python’s handling of default parameter values is one of a few things that tends to trip up most new Python programmers (but usually only once).
 
-Firstly, derive the maximum revision, use GROUP BY on ID with MAX on Revision.
-Then, this is joint with the table for the max revision and ID.
-*/
+What causes the confusion is the behaviour you get when you use a “mutable” object as a default value; that is, a value that can be modified in place, like a list or a dictionary.
 
-SELECT a.*
- FROM Revs a 
-     , (SELECT b.ID
-			 , max(b.Revision) Revision_max
-		 FROM revs b
-		GROUP BY b.ID) rev
-WHERE a.ID = rev.ID
-  AND a.Revision = rev.Revision_max ;
+An example:
 
-----------
-Remove duplicate columns in table with primary key 
+>>> def function(data=[]):
+...     data.append(1)
+...     return data
+...
+>>> function()
+[1]
+>>> function()
+[1, 1]
+>>> function()
+[1, 1, 1]
+As you can see, the list keeps getting longer and longer.
 
-/* This program will determine how to remove duplicate columns in a table with primary key
-Table: Employee
-ID  Emp_Num Name   Salary
-1   1000    John   1000
-2   1000    John   1000
-3   1001    Craig  11000
+Why does this happen? #
 
-Since ID is the primary key here, group the column based on any column other than the primary key - preferably Emp_Num since they differ for each employee
-Pick the max or min ID for each employee number and delete all other columns other than the selected row for the Emp_Num
-*/
-
-DELETE FROM employee a
-  WHERE a.id NOT IN (SELECT del.ID 
-					   FROM (SELECT min(b.id)
-                                  , b.emp_num					   
-							   FROM employee b
-							  GROUP BY b.emp_num) del) ;
-
-----------							  
-Remove duplicate columns in table without primary key 
-
-/* This program will determine how to remove duplicate columns in a table without primary key
-Table: Employee
-Emp_Num Name   Salary
-1000    John   1000
-1000    John   1000
-1001    Craig  11000
-
-Since we do not have the primary key, group the column based on any column other than the primary key - preferably Emp_Num since they differ for each employee
-Pick the max or min ROWID for each employee number and delete all other columns other than the selected row for the Emp_Num
-*/
-
-DELETE FROM employee a
-  WHERE a.ROWID NOT IN (SELECT del.ROWID 
-						FROM (SELECT min(b.ROWID)
-                                   , b.emp_num					   
-								FROM employee b
-							  GROUP BY b.emp_num) del) ;
-
------------							  
-Count number of specific characters in a column
-
-/* Determine the number of specific characters in a column 
-eg. Count number of 'A' in the column name
-Emp_Num Name     Salary
-1000    John     1000
-1002    Mathew   1000
-1001    Craig    11000
-
-Replace the A's with blank. Now subtract the length of the column initially and the length of the column after replacing. 
-*/
-
-SELECT LENGTH(NAME) - LENGTH(REPLACE(NAME, 'A', '')) Char_Count
-  FROM employee ;
-
------------
-Nth salary in a database
-
-/* Determine the n th salary in a database
-eg. Determine the third highest salary
-Emp_Num Name     Salary
-1000    John     1000
-1002    Mathew   1000
-1001    Craig    11000
-
-Make a subquery taking all the required data from employee table along with the rownum sorted in descending order. 
-Use this data to get the required salary
-*/
-
-SELECT name
-     , salary 
- FROM (
-    SELECT Name
-	     , Salary
-		 , RN = ROW_NUMBER() OVER (ORDER BY Salary DESC)
-    FROM employee
-		) sal
-WHERE RN = :nth_salary;
-
--------------
-Extract duplicate rows present in a DB
-
-/* This program will extract all the duplicate columns present in a DB 
-Table: Employee
-Emp_Num Name   Salary
-1000    John   1000
-1000    John   1000
-1001    Craig  11000
-
-Group the column based on any column that should stay unique for a row and take all the records that have a count greater than 1 for that particular value.
-To get the number of duplicate rows, use count function and subtract it by 1 so that only the duplicate row count is listed
-*/
-
-SELECT name
-     , emp_num
-	 , count(*) - 1 Number of duplicate rows 					   
- FROM employee b
-GROUP BY name  
-      , emp_num
-HAVING count(*) > 1;
-
-------------
-Calculate running total
-
-/*Program to generate running total for every day.
-Table: Sales
-
-id     date    	   value
---     --------    ---------
-45     01/Jan/17   3
-23     08/Jan/17   5
-12     02/Feb/17   0
-77     14/Feb/17   7
-39     20/Feb/17   34
-33     02/Mar/17   6
-
-The idea is to have a fourth column that will generate the total of value till date 
-
-id     date    	   value  	  runningtotal
---     --------    ---------  ------------
-45     01/Jan/09   3          3
-23     08/Jan/09   5          8
-12     02/Feb/09   0          8
-77     14/Feb/09   7          15  
-39     20/Feb/09   34         49
-33     02/Mar/09   6          55
-
-This is possible using OVER function and defining the limits to current row.
-This way only the rows till current row will be considered.
-*/
-
-SELECT date, value,
-  SUM(value) OVER(ORDER BY date 
-     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) 
-          AS RunningTotal
-FROM sales ;
-
----------
-Update using a SELECT statement
-
-/* Program to update a table using SELECT statement
-
-The SELECT query can be placed after the SET statement in UPDATE.
-Use FROM to incorporate the SELECT condition
-*/
-UPDATE table 
-SET Col1 = i.Col1, 
-    Col2 = i.Col2 
-FROM (
-    SELECT ID, Col1, Col2 
-    FROM other_table) i
-WHERE 
-    i.ID = table.ID ;
-	
+Default parameter values are always evaluated when, and only when, the “def” statement they belong to is executed.
+If you execute “def” multiple times, it’ll create a new function object (with freshly calculated default values) each time.
 -------
-Top n records from each group
+Print without a new line or space
 
-/* Program to extract top n records from each group of a table.
+''' Unlike other Object oriented languages, Python adds a new line after every print. 
+So every time a line is printed the cursor automatically moves to the next line.
+This can be avoided by passing an additional parameter to the print statement.
+By default, parameter 'end' is assigned to the value '\n' which is  a new line.
+By changing this to '' we can avoid the new line.
+Similarly if the requirement is to add a space after every print, pass the 'end' parameter as ' '
+'''
 
-Table: Fruits
-  type   | variety  | price |
-+--------+----------+-------+
-| apple  | gala     |  2.79 | 
-| apple  | fuji     |  0.24 | 
-| orange | valencia |  3.59 | 
-| orange | navel    |  9.36 | 
-| pear   | bradford |  6.05 | 
-| pear   | bartlett |  2.14 | 
-| cherry | bing     |  2.55 | 
-| cherry | chelan   |  6.33 | 
-
-Go through the table. For each record check if the fruit's price is less than the n th cheapest price for the type.
-*/
-
-select type, variety, price
-from fruits
-where (
-   select count(*) from fruits as f
-   where f.type = fruits.type and f.price <= fruits.price
-) <= :n ;
+for i in range(10):
+	print(i, end = '')
 
 ------
-Select a random row from a table
 
-/* Program to generate a random row from a table
-Use the function dbms_random.value in the ORDER BY clause.
-This will reorder all the rows in the table in a random fashion.
-Now take out the first row to get the random row
-*/
+Running Shell Commands from Python
 
-SELECT a.column 
-FROM ( SELECT column 
-        FROM table
-	ORDER BY dbms_random.value ) a
-WHERE rownum = 1 ;
+''' Run function is recommended. 
+It provides a very general, high-level API for the subprocess module. 
+To capture the output of a program, pass the subprocess.PIPE flag to the stdout keyword argument. 
+Then access the stdout attribute of the returned CompletedProcess object
+'''
 
--------
-Concatenate values to a single row from multiple rows
-
-/* Program to concatenate values to a single row from multiple rows
-PID   SEQ    Desc
-A     1      Have
-A     2      a nice
-A     3      day.
-B     1      Nice Work.
-C     1      Yes
-C     2      we can 
-C     3      do 
-C     4      this work!
-
-A very common one is to use LISTAGG. 
-Then join to A to pick out the pids you want.
-Point to Note: LISTAGG only works correctly with VARCHAR2 columns.
-*/
-
-SELECT pid
-     , LISTAGG(Desc, ' ') WITHIN GROUP (ORDER BY seq) AS desc
-FROM B 
-GROUP BY pid;
-
--------
-Table name as variable
-
-/*Program to use Table Name as variable
-Dynamically pass table name during run time using EXECUTE IMMEDIATE.
-Store the table name in a variable
-Refer the variable during run time.
-The table will be directly used.
-*/
-
-DECLARE
-
- l_tblnam   varchar2(20) := 'emp';
- l_cnt      number;
-
-BEGIN
- EXECUTE IMMEDIATE 'SELECT count(*) FROM :a ;'
-   INTO l_cnt
-   USING in l_tblnam;
-
- IF l_cnt == 0 then
-    dbms_output.put_line('No Data');
- END IF;
-END;
+import subprocess
+result = subprocess.run(['ls', '-l'], stdout=subprocess.PIPE)
+result.stdout
 
 -----
-Split comma separated values to columns
 
-/* Program to convert Comma separated values in a column to multiple columns
+Schedule a Python program to run on startup
 
-Table: dummy
-ROW  | VAL
------------ 
-1    | 1.25, 3.87, 2
-2    | 5, 4, 3.3
+There are many methods to schedule a python program to run on startup.
 
-Create a Regex statement that will parse after every ','.
-Match the occurrence of ',' and split it accordingly.
-Limitation of using the above method - There should not be any NULL values in the middle.
-The number of values separated should be constant
-*/
+One of the methods to schedule a program is through making an entry in registry Key.
+Before proceeding, locate the path of the Python file that has to be scheduled.
+Open Run
+Search regedit
+Navigate to HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+This path will contain all the programs that will run on Windows startup.
+Create a new string and enter the location of the Python script as value.
 
-SELECT regexp_substr(val, '[^,]+', 1, 1) as val1, 
-       regexp_substr(val, '[^,]+', 1, 2) as val2, 
-       regexp_substr(val, '[^,]+', 1, 3) as val3
-FROM dummy;	   
-
--------
-Upsert (Update or Insert based on the condition) a table
-
-/* Program to update or insert a table based on a condition
-Usual method to achieve this is using MERGE.
-Based on a condition, either of the conditions will be evaluated. 
-This statement is a convenient way to combine multiple operations. 
-It lets you avoid multiple INSERT, UPDATE, and DELETE DML statements.
-*/
-
-MERGE INTO bonuses D
-   USING (SELECT employee_id, salary, department_id FROM employees
-   WHERE department_id = 80) S
-   ON (D.employee_id = S.employee_id)
-   WHEN MATCHED THEN UPDATE SET D.bonus = D.bonus + S.salary*.01
-     DELETE WHERE (S.salary > 8000)
-   WHEN NOT MATCHED THEN INSERT (D.employee_id, D.bonus)
-     VALUES (S.employee_id, S.salary*.01)
-     WHERE (S.salary <= 8000);
-	 
---------
-Generating Factorial Series using SQL
-
-/* Program to generate a Factorial series
-Using Recursion,we can generate the Factorial Series through SQL
-Pass the number whose factorial is required. 
-The recursion starts at 1 and the program keeps looping till the number is reached.
-*/
-
-;with fact as (
-    select 1 as fac, 1 as num
-    union all
-    select fac*(num+1), num+1
-    from fact
-    where num<12)
-select fac
-from fact
-where num=5
+Restart system, now the Python program will run on startup.
 
 --------
-Generating Fibonacci Series using SQL
+Sorting numbers using Python (around 10^5 data)
 
-/* Program to generate a Fibonacci series
-Using Recursion,we can generate the Factorial Series through SQL
-Pass the nth term 
-The recursion starts at 1 and the program keeps looping till the number is reached.
-*/
+''' Python has an in built function sort that will sort all the elements in the list. 
+However, this function will take very long time for lists containing very large number of data in the scale of 10^5.
+For large data, the sorting function can be optimized to return the sorted list quickly.
 
-;with fibo as (
-    select 0 as fibA, 0 as fibB, 1 as seed, 1 as  num
-    union all
-    select seed+fibA, fibA+fibB, fibA, num+1
-    from fibo
-    where num<12)
-select fibA
-from fibo
-where num = 5
+Split the list based on the length of the digits.
+For every unique length of data, create an entry in a dictionary and store the value in them. 
+Now sort individually all the buckets and print it.
+
+This reduces the burden of sorting all the elements in the list one at a time. 
+'''
+
+n = int(input().strip())
+bucket = {}
+
+# read all integers as strings, store them by length in the bucket
+for _ in range(n):
+    number = input().strip()
+    length = len(number)
+    if length not in bucket:
+        bucket[length] = []
+    bucket[length].append(number)
+for i in sorted(bucket):
+    for j in sorted(bucket[i]):
+        print(j)
+-------
+Reading a big file and process it as chunks
+
+'''Program to read a big file (of some GBs) and process them in chunks.
+Basically create a loop with all data of the file
+Call a function in the loop and define the chunk size 
+Chunk size should be provided as bytes. 
+As in the program, it is set as 1024 bytes.
+For every loop, 1 kB of data will be processed. 
+'''
+
+def read_in_chunks(file_object, chunk_size=1024):
+    """Function (generator) to read a file piece by piece.
+    Default chunk size: 1k."""
+    while True:
+        data = file_object.read(chunk_size)
+        if not data:
+            break
+        yield data
+
+
+f = open('really_big_file.dat')
+for piece in read_in_chunks(f):
+    process_data(piece)
+-------
+
+Get the number of lines in a file
+
+''' Program is very straightforward.
+Load the file and loop it for each line
+Each iteration will correspond to one line.
+Number of iterations will be the number of lines.
+Counter starts from 0. Hence we add 1 to the final total to get the actual number of lines.
+'''
+
+def file_len(fname):
+    with open(fname) as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1
+	
+file_len('big_file.csv')
 
 -------
-Last SQL fired by the User on Database
+Print '{' braces and also use format on a string
 
-/* Program to get the last SQL fired by a user on a DB.
-v$sqltext_with_newlines contains the SQL that was fired by the user
-This is joined with the session and user tables to get the SQL 
-*/
+'''General syntax for format 
+print("Sammy has {} balloons.".format(5)) 
+This will return - Sammy has 5 balloons.
+The curly braces will be replaced with value present in the format LOVs
 
-SELECT S.USERNAME || '(' || s.sid || ')-' || s.osuser UNAME,
-         s.program || '-' || s.terminal || '(' || s.machine || ')' PROG,
-         s.sid || '/' || s.serial# sid,
-         s.status "Status",
-         p.spid,
-         sql_text sqltext
-    FROM v$sqltext_with_newlines t, V$SESSION s, v$process p
-   WHERE     t.address = s.sql_address
-         AND p.addr = s.paddr(+)
-         AND t.hash_value = s.sql_hash_value
-ORDER BY s.sid, t.piece;
+Now to print '{' also as a part, add '{{'.
+This will make sure that only the inner braces will be replaced 
+'''
+x = " {{ Hello }} {0} "
+print x.format(42)
 
------------
+-------
+List all files in a directory with a particular extension
+
+'''Program to list all the files in a directory with particular extension.
+'os' library contains listdir which can be used to list all the directories under a particular directory
+endswith function can be used to check if the file has the particular extension.
+'''
+
+import os
+for file in os.listdir("/mydir"):
+    if file.endswith(".txt"):
+        print(os.path.join("/mydir", file))
+		
+--------
+Send email with an attachment using Python
+
+'''Program to send email along with attachment
+Import smtplib for the actual sending function
+Import the email modules required such as application, multipart and text
+Multipart contains the links to add From ,To, Date, Subject 
+Attachment can be made using msg.attach
+'''
+
+import smtplib
+from os.path import basename
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE, formatdate
+
+
+def send_mail(send_from, send_to, subject, text, files=None,
+              server="127.0.0.1"):
+
+    msg = MIMEMultipart()
+    msg['From'] = send_from
+    msg['To'] = COMMASPACE.join(send_to)
+    msg['Date'] = formatdate(localtime=True)
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(text))
+
+    for f in files or []:
+        with open(f, "rb") as fil:
+            part = MIMEApplication(
+                fil.read(),
+                Name=basename(f)
+            )
+        # After the file is closed
+        part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
+        msg.attach(part)
+
+
+    smtp = smtplib.SMTP(server)
+    smtp.sendmail(send_from, send_to, msg.as_string())
+    smtp.close()
+	
+--------
+Create random OTPs with a combination of letters and numbers
+
+''' As expected, random function will be used to generate a random series
+Create a variable containing all the numbers and letters.
+Use random library on this to generate the OTP.
+The length of the OTP can also be controlled
+'''
+
+import string
+import random
+
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+	
+-------
+Pad Zeroes to String (Methods across all versions)
+
+'''zfill will be used for padding zeroes to the string
+For number, format function can be used to pad zeroes
+'''
+
+n = 4
+>>> print '%03d' % n
+004
+>>> print format(n, '03') # python >= 2.6
+004
+>>> print '{0:03d}'.format(n)  # python >= 2.6
+004
+>>> print '{foo:03d}'.format(foo=n)  # python >= 2.6
+004
+>>> print('{:03d}'.format(n))  # python >= 2.7 + python3
+004
+>>> print('{0:03d}'.format(n))  # python 3
+004
+>>> print(f'{n:03}') # python >= 3.6
+004
+
+--------
+Split string with multiple delimiters
+
+'''Split function is generally used to split a string to multiple pieces based on a delimitier.
+eg. 
+x = 'Hi,how are you'
+k = x.split(',')
+print(k)
+
+This will generate a list with 2 values Hi and how are you
+
+However, to split a function based on multiple delimiters, split function cant be used
+Luckily, Python has this built-in 're' library. 
+Pass the regex pattern as parameter
+'''
+
+a='Beautiful, is; better*than\nugly'
+import re
+print(re.split('; |, |\*|\n',a))
+--------
+Read only the specific line of file in Python
+
+''' Program to read specific line of a file. 
+Loop through the each line of the file.
+Once the specific line is reached, process the line. 
+Quite straightforward.
+Counter starts from 0. Hence we subtract 1 to get the exact line.
+'''
+
+fp = open("file")
+for i, line in enumerate(fp):
+    if i == 25:
+        # 26th line
+		process()
+    elif i == 29:
+        # 30th line
+		process()
+    elif i > 29:
+        break
+fp.close()
+
+-------
+Executing a string containing Python code
+
+''' Exec function can be used to run Python commands
+Pass the command as parameter to exec function
+If result of an expression(2 + 2) is required, then use eval function
+'''
+
+mycode = 'print ("hello world")'
+exec(mycode)
+
+------
+Check file size in Python
+
+''' Program to return file size using Python
+'os' library contains the function stat that contains relevant details to the file passed.
+Retrieve the size by using st_size attribute.
+This will return the size in bytes.
+'''
+
+import os
+statinfo = os.stat('somefile.txt')
+print(statinfo.st_size)
+
+------
+Convert files to JPG
+
+''' Program to convert files to JPEG
+This is a simple program that splits the file name and the extension separately. 
+Then the required extension is added to the file name and the image is saved. 
+Image library contains the necessary functions to process images. 
+'''
+
+import os, sys
+import Image
+
+for infile in sys.argv[1:]: # sys.argv[1:] contains all the file whose extensions have to be saved.  
+    f, e = os.path.splitext(infile)
+    outfile = f + ".jpg"
+    if infile != outfile:
+        try:
+            Image.open(infile).save(outfile)
+        except IOError:
+            print "cannot convert", infile
+
+-------
+Version of Python script
+
+This information is available in the sys.version string in the sys module:
+
+>>> import sys
+Human readable:
+
+>>> print (sys.version) #parentheses necessary in python 3.       
+2.5.2 (r252:60911, Jul 31 2008, 17:28:52) 
+[GCC 4.2.3 (Ubuntu 4.2.3-2ubuntu7)]
+For further processing:
+
+>>> sys.version_info
+(2, 5, 2, 'final', 0)
+# or
+>>> sys.hexversion
+34014192
+
+To ensure a script runs with a minimal version requirement of the Python interpreter add this to your code:
+
+assert sys.version_info >= (2,5)
+This compares major and minor version information. Add micro (=0, 1, etc) and even releaselevel (='alpha','final', etc) to the tuple as you like
+
+--------
+Element wise addition of two lists
+
+'''Consider 2 lists
+list1=[1, 2, 3]
+list2=[4, 5, 6]
+
+Element wise addition is adding first element of list 1 with first element of second list, addition of second element of first list with second element of second list.
+Final result 
+[5,7,9]
+'''
+Use map with operator.add:
+
+>>> from operator import add
+>>> map(add, list1, list2)
+[5, 7, 9]
+or zip with a list comprehension:
+
+>>> [sum(x) for x in zip(list1, list2)]
+[5, 7, 9]
+
+------
+All files and directories under a path
+
+''' Program to list all directories and files under them
+os.walk() function will get all the files and the directories placed under a path.
+It has the attributes root, dirs (lists the directories), files(lists the files) which ca be used to locate the file and print them.
+'''
+
+import os
+for root, dirs, files in os.walk("."):
+    for name in files:
+        print(os.path.join(root, name))
+    for name in dirs:
+        print(os.path.join(root, name))
+------
