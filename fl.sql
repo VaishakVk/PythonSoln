@@ -1,393 +1,143 @@
-Default Parameter Values in Python
+Call a Python script from another script
 
-Python’s handling of default parameter values is one of a few things that tends to trip up most new Python programmers (but usually only once).
+There is a script named test1.py. 
+It just has code that should execute when the script itself is run. 
+There is another script which runs as a service. 
+To call a script from anther script, use filename.function to be called after importing the file.
 
-What causes the confusion is the behaviour you get when you use a “mutable” object as a default value; that is, a value that can be modified in place, like a list or a dictionary.
+test1.py
 
-An example:
+def some_func():
+    print 'in test 1, unproductive'
 
->>> def function(data=[]):
-...     data.append(1)
-...     return data
-...
->>> function()
-[1]
->>> function()
-[1, 1]
->>> function()
-[1, 1, 1]
-As you can see, the list keeps getting longer and longer.
+if __name__ == '__main__':
+    # test1.py executed as script
+    # do something
+    some_func()
 
-Why does this happen? #
+service.py
 
-Default parameter values are always evaluated when, and only when, the “def” statement they belong to is executed.
-If you execute “def” multiple times, it’ll create a new function object (with freshly calculated default values) each time.
--------
-Print without a new line or space
+import test1
 
-''' Unlike other Object oriented languages, Python adds a new line after every print. 
-So every time a line is printed the cursor automatically moves to the next line.
-This can be avoided by passing an additional parameter to the print statement.
-By default, parameter 'end' is assigned to the value '\n' which is  a new line.
-By changing this to '' we can avoid the new line.
-Similarly if the requirement is to add a space after every print, pass the 'end' parameter as ' '
-'''
+def service_func():
+    print 'service func'
 
-for i in range(10):
-	print(i, end = '')
-
-------
-
-Running Shell Commands from Python
-
-''' Run function is recommended. 
-It provides a very general, high-level API for the subprocess module. 
-To capture the output of a program, pass the subprocess.PIPE flag to the stdout keyword argument. 
-Then access the stdout attribute of the returned CompletedProcess object
-'''
-
-import subprocess
-result = subprocess.run(['ls', '-l'], stdout=subprocess.PIPE)
-result.stdout
-
------
-
-Schedule a Python program to run on startup
-
-There are many methods to schedule a python program to run on startup.
-
-One of the methods to schedule a program is through making an entry in registry Key.
-Before proceeding, locate the path of the Python file that has to be scheduled.
-Open Run
-Search regedit
-Navigate to HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
-This path will contain all the programs that will run on Windows startup.
-Create a new string and enter the location of the Python script as value.
-
-Restart system, now the Python program will run on startup.
-
---------
-Sorting numbers using Python (around 10^5 data)
-
-''' Python has an in built function sort that will sort all the elements in the list. 
-However, this function will take very long time for lists containing very large number of data in the scale of 10^5.
-For large data, the sorting function can be optimized to return the sorted list quickly.
-
-Split the list based on the length of the digits.
-For every unique length of data, create an entry in a dictionary and store the value in them. 
-Now sort individually all the buckets and print it.
-
-This reduces the burden of sorting all the elements in the list one at a time. 
-'''
-
-n = int(input().strip())
-bucket = {}
-
-# read all integers as strings, store them by length in the bucket
-for _ in range(n):
-    number = input().strip()
-    length = len(number)
-    if length not in bucket:
-        bucket[length] = []
-    bucket[length].append(number)
-for i in sorted(bucket):
-    for j in sorted(bucket[i]):
-        print(j)
--------
-Reading a big file and process it as chunks
-
-'''Program to read a big file (of some GBs) and process them in chunks.
-Basically create a loop with all data of the file
-Call a function in the loop and define the chunk size 
-Chunk size should be provided as bytes. 
-As in the program, it is set as 1024 bytes.
-For every loop, 1 kB of data will be processed. 
-'''
-
-def read_in_chunks(file_object, chunk_size=1024):
-    """Function (generator) to read a file piece by piece.
-    Default chunk size: 1k."""
-    while True:
-        data = file_object.read(chunk_size)
-        if not data:
-            break
-        yield data
-
-
-f = open('really_big_file.dat')
-for piece in read_in_chunks(f):
-    process_data(piece)
--------
-
-Get the number of lines in a file
-
-''' Program is very straightforward.
-Load the file and loop it for each line
-Each iteration will correspond to one line.
-Number of iterations will be the number of lines.
-Counter starts from 0. Hence we add 1 to the final total to get the actual number of lines.
-'''
-
-def file_len(fname):
-    with open(fname) as f:
-        for i, l in enumerate(f):
-            pass
-    return i + 1
+if __name__ == '__main__':
+    # service.py executed as script
+    # do something
+    service_func()
+    test1.some_func()
 	
-file_len('big_file.csv')
-
--------
-Print '{' braces and also use format on a string
-
-'''General syntax for format 
-print("Sammy has {} balloons.".format(5)) 
-This will return - Sammy has 5 balloons.
-The curly braces will be replaced with value present in the format LOVs
-
-Now to print '{' also as a part, add '{{'.
-This will make sure that only the inner braces will be replaced 
-'''
-x = " {{ Hello }} {0} "
-print x.format(42)
-
--------
-List all files in a directory with a particular extension
-
-'''Program to list all the files in a directory with particular extension.
-'os' library contains listdir which can be used to list all the directories under a particular directory
-endswith function can be used to check if the file has the particular extension.
-'''
-
-import os
-for file in os.listdir("/mydir"):
-    if file.endswith(".txt"):
-        print(os.path.join("/mydir", file))
-		
---------
-Send email with an attachment using Python
-
-'''Program to send email along with attachment
-Import smtplib for the actual sending function
-Import the email modules required such as application, multipart and text
-Multipart contains the links to add From ,To, Date, Subject 
-Attachment can be made using msg.attach
-'''
-
-import smtplib
-from os.path import basename
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.utils import COMMASPACE, formatdate
-
-
-def send_mail(send_from, send_to, subject, text, files=None,
-              server="127.0.0.1"):
-
-    msg = MIMEMultipart()
-    msg['From'] = send_from
-    msg['To'] = COMMASPACE.join(send_to)
-    msg['Date'] = formatdate(localtime=True)
-    msg['Subject'] = subject
-
-    msg.attach(MIMEText(text))
-
-    for f in files or []:
-        with open(f, "rb") as fil:
-            part = MIMEApplication(
-                fil.read(),
-                Name=basename(f)
-            )
-        # After the file is closed
-        part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
-        msg.attach(part)
-
-
-    smtp = smtplib.SMTP(server)
-    smtp.sendmail(send_from, send_to, msg.as_string())
-    smtp.close()
-	
---------
-Create random OTPs with a combination of letters and numbers
-
-''' As expected, random function will be used to generate a random series
-Create a variable containing all the numbers and letters.
-Use random library on this to generate the OTP.
-The length of the OTP can also be controlled
-'''
-
-import string
-import random
-
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
-	
--------
-Pad Zeroes to String (Methods across all versions)
-
-'''zfill will be used for padding zeroes to the string
-For number, format function can be used to pad zeroes
-'''
-
-n = 4
->>> print '%03d' % n
-004
->>> print format(n, '03') # python >= 2.6
-004
->>> print '{0:03d}'.format(n)  # python >= 2.6
-004
->>> print '{foo:03d}'.format(foo=n)  # python >= 2.6
-004
->>> print('{:03d}'.format(n))  # python >= 2.7 + python3
-004
->>> print('{0:03d}'.format(n))  # python 3
-004
->>> print(f'{n:03}') # python >= 3.6
-004
-
---------
-Split string with multiple delimiters
-
-'''Split function is generally used to split a string to multiple pieces based on a delimitier.
-eg. 
-x = 'Hi,how are you'
-k = x.split(',')
-print(k)
-
-This will generate a list with 2 values Hi and how are you
-
-However, to split a function based on multiple delimiters, split function cant be used
-Luckily, Python has this built-in 're' library. 
-Pass the regex pattern as parameter
-'''
-
-a='Beautiful, is; better*than\nugly'
-import re
-print(re.split('; |, |\*|\n',a))
---------
-Read only the specific line of file in Python
-
-''' Program to read specific line of a file. 
-Loop through the each line of the file.
-Once the specific line is reached, process the line. 
-Quite straightforward.
-Counter starts from 0. Hence we subtract 1 to get the exact line.
-'''
-
-fp = open("file")
-for i, line in enumerate(fp):
-    if i == 25:
-        # 26th line
-		process()
-    elif i == 29:
-        # 30th line
-		process()
-    elif i > 29:
-        break
-fp.close()
-
--------
-Executing a string containing Python code
-
-''' Exec function can be used to run Python commands
-Pass the command as parameter to exec function
-If result of an expression(2 + 2) is required, then use eval function
-'''
-
-mycode = 'print ("hello world")'
-exec(mycode)
-
 ------
-Check file size in Python
+Lists vs Tuples - which is faster ?
 
-''' Program to return file size using Python
-'os' library contains the function stat that contains relevant details to the file passed.
-Retrieve the size by using st_size attribute.
-This will return the size in bytes.
-'''
+There are several performance differences between tuples and lists when it comes to instantiation and retrieval of elements:
 
-import os
-statinfo = os.stat('somefile.txt')
-print(statinfo.st_size)
+Tuples containing immutable entries can be optimized into constants by Python's peephole optimizer. Lists, on the other hand, get build-up from scratch:
+>>> from dis import dis
 
-------
-Convert files to JPG
+>>> dis(compile("(10, 'abc')", '', 'eval'))
+  1           0 LOAD_CONST               2 ((10, 'abc'))
+              3 RETURN_VALUE   
 
-''' Program to convert files to JPEG
-This is a simple program that splits the file name and the extension separately. 
-Then the required extension is added to the file name and the image is saved. 
-Image library contains the necessary functions to process images. 
-'''
+>>> dis(compile("[10, 'abc']", '', 'eval'))
+  1           0 LOAD_CONST               0 (10)
+              3 LOAD_CONST               1 ('abc')
+              6 BUILD_LIST               2
+              9 RETURN_VALUE 
+Internally, tuples are stored a little more efficiently than lists, and also tuples can be accessed slightly faster.
 
-import os, sys
-import Image
+Here is how the tuple (10, 20) is stored:
 
-for infile in sys.argv[1:]: # sys.argv[1:] contains all the file whose extensions have to be saved.  
-    f, e = os.path.splitext(infile)
-    outfile = f + ".jpg"
-    if infile != outfile:
-        try:
-            Image.open(infile).save(outfile)
-        except IOError:
-            print "cannot convert", infile
+typedef struct {
+    Py_ssize_t ob_refcnt;
+    struct _typeobject *ob_type;
+    Py_ssize_t ob_size;
+    PyObject *ob_item[2];     /* store a pointer to 10 and a pointer to 20 */
+} PyTupleObject;
+Here is how the list [10, 20] is stored:
+PyObject arr[2];              /* store a pointer to 10 and a pointer to 20 */
 
--------
-Version of Python script
-
-This information is available in the sys.version string in the sys module:
-
->>> import sys
-Human readable:
-
->>> print (sys.version) #parentheses necessary in python 3.       
-2.5.2 (r252:60911, Jul 31 2008, 17:28:52) 
-[GCC 4.2.3 (Ubuntu 4.2.3-2ubuntu7)]
-For further processing:
-
->>> sys.version_info
-(2, 5, 2, 'final', 0)
-# or
->>> sys.hexversion
-34014192
-
-To ensure a script runs with a minimal version requirement of the Python interpreter add this to your code:
-
-assert sys.version_info >= (2,5)
-This compares major and minor version information. Add micro (=0, 1, etc) and even releaselevel (='alpha','final', etc) to the tuple as you like
+typedef struct {
+    Py_ssize_t ob_refcnt;
+    struct _typeobject *ob_type;
+    Py_ssize_t ob_size;
+    PyObject **ob_item = arr; /* store a pointer to the two-pointer array */
+    Py_ssize_t allocated;
+} PyListObject;
+Note that the tuple object incorporates the two data pointers directly while the list object has an additional layer of indirection to an external array holding the two data pointers.
 
 --------
-Element wise addition of two lists
+Remove \n from list element
 
-'''Consider 2 lists
-list1=[1, 2, 3]
-list2=[4, 5, 6]
+This scenario occurs when we use Python to a read line from a .txt file and write the elements of the first line into a list. 
+When we open the list, we might get the list to store data like this
 
-Element wise addition is adding first element of list 1 with first element of second list, addition of second element of first list with second element of second list.
-Final result 
-[5,7,9]
-'''
-Use map with operator.add:
+['Name1', '7.3', '6.9', '6.6', '6.6', '6.1', '6.4', '7.3\n']
 
->>> from operator import add
->>> map(add, list1, list2)
-[5, 7, 9]
-or zip with a list comprehension:
+This is because each of the line in the file ends with a new line and this gets attached to the list.
+To remove this we could simply use strip function without passing any parameters
+The strip function removes all the whitespaces or other irrelevant characters.
+Care should be taken to ensure that the last element in the list contains a value other than \n
+If the last element is a \n and whitespaces, this might result in the deletion of both white space and the \n character
 
->>> [sum(x) for x in zip(list1, list2)]
-[5, 7, 9]
+If you want to remove \n from the last element only, use this:
 
-------
-All files and directories under a path
+t[-1] = t[-1].strip()
+If you want to remove \n from all the elements, use this:
 
-''' Program to list all directories and files under them
-os.walk() function will get all the files and the directories placed under a path.
-It has the attributes root, dirs (lists the directories), files(lists the files) which ca be used to locate the file and print them.
-'''
+t = map(lambda s: s.strip(), t)
 
-import os
-for root, dirs, files in os.walk("."):
-    for name in files:
-        print(os.path.join(root, name))
-    for name in dirs:
-        print(os.path.join(root, name))
-------
+--------
+Last occurrence of an item in list
+
+There is not a builtin function that returns the last occurrence of a string (like the reverse of index).
+Iterate through the list, find the maximum value of the index.
+
+max(loc for loc, val in enumerate(li) if val == 'a')
+
+-------
+Getting password input
+
+Program to enter the password and, as you type, nothing is shown in the terminal window (the password is not shown).
+Python has a library getpass which will not display the text as you type
+This works on Linux, Windows and Mac
+
+import getpass
+password = getpass.getpass("Enter your Password:")
+print(password)
+
+-------
+Concatenate str and int objects
+
+The problem here is that the + operator has (at least) two different meanings in Python: 
+for numeric types, it means "add the numbers together"
+for sequence types, it means "concatenate the sequences":
+
+Python doesn't implicitly convert objects from one type to another1 in order to make operations "make sense", because that would be confusing.
+For instance, you might think that '3' + 5 should mean '35', but someone else might think it should mean 8 or even '8'
+Because of this, one needs to do the conversion explicitly.
+
+a = 123
+print('Total: ' + str(a))
+
+--------
+Set the current working directory
+
+OS library contains the function chdir - that allows you to change the working directory
+To check the current working directory use getcwd
+
+import os;
+print os.getcwd() # Prints the working directory
+To set the working directory:
+
+os.chdir('c:\\Users\uname\desktop\python') # Provide the path here
+
+-------
+Select longest string from a list
+
+Select the maximum 
+mylist = ['123','123456','1234']
+print max(mylist, key=len)
+
+123456
