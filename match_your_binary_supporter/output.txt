@@ -1,0 +1,7 @@
+13 is SUPPORTED BY THE NUMBER 17
+Exception : "India" is a string!
+No input provided!
+Exception : 26 is a duplicate entry!
+10 is NOT SUPPORTED
+Exception : 18 is not in the list!
+

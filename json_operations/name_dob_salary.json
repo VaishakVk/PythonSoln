@@ -1,0 +1,93 @@
+[
+	{
+		"First_name": "Nathan",
+		"Last_name": "Astle",
+		"Date_of_birth": "1971-05-18",
+		"Salary": 41000
+
+	},
+	{
+		"First_name": "Nathan",
+		"Last_name": "Astle",
+		"Date_of_birth": "1971-05-19",
+		"Salary": 41000
+
+	},
+	{
+		"First_name": "Arthur",
+		"Last_name": "Harrison",
+		"Date_of_birth": "1982-01-29",
+		"Salary": 50500
+
+	},
+	{
+		"First_name": "Cameron",
+		"Last_name": "White",
+		"Date_of_birth": "1982-01-29",
+		"Salary": 47450
+
+	},
+	{
+		"First_name": "Steve",
+		"Last_name": "Finn",
+		"Date_of_birth": "1971-05-18",
+		"Salary": 38990
+
+	},
+	{
+		"First_name": "Elliot",
+		"Last_name": "Luca",
+		"Date_of_birth": "1971-05-18",
+		"Salary": 40230
+
+	},
+	{
+		"First_name": "Methews",
+		"Last_name": "Haiden",
+		"Date_of_birth": "1971-05-18",
+		"Salary": 40230
+
+	},
+	{
+		"First_name": "John",
+		"Last_name": "Smith",
+		"Date_of_birth": "1971-05-18",
+		"Salary": 40230
+
+	},
+	{
+		"First_name": "Daniel",
+		"Last_name": "Clerk",
+		"Date_of_birth": "1971-05-18",
+		"Salary": 40230
+
+	},
+	{
+		"First_name": "Allan",
+		"Last_name": "Hernandez",
+		"Date_of_birth": "1981-01-19",
+		"Salary": 23789
+
+	},
+	{
+		"First_name": "Harley",
+		"Last_name": "Smith",
+		"Date_of_birth": "1988-05-21",
+		"Salary": 28500
+
+	},
+	{
+		"First_name": "Nathaniel",
+		"Last_name": "Stewert",
+		"Date_of_birth": "1980-08-10",
+		"Salary": 31250
+
+	},
+	{
+		"First_name": "Michael",
+		"Last_name": "Johnson",
+		"Date_of_birth": "1990-03-26",
+		"Salary": 25280
+
+	}
+]
